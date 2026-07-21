@@ -19,7 +19,7 @@ See [SKILL.md](SKILL.md) for the decision tree this feeds into. Findings from st
 | Option | Tajik support | Notes |
 |---|---|---|
 | Tesseract (`image-to-text` skill, local) | None — verified against `tessdata_fast` and `tessdata_contrib`, no `tgk.traineddata` exists | Use `rus` as the closest approximation; expect systematic misreads of the six Tajik-only letters; always follow with the correction pass in [orthography.md](orthography.md). |
-| RapidOCR (local) | Unconfirmed — not verified here; treat as the same situation as Tesseract unless independently checked | Same fallback-and-correct pattern applies until Tajik support is actually confirmed. |
+| RapidOCR (local) | None — verified directly against its actual model config (`default_models.yaml` in the RapidOCR repo): it ships a generic "cyrillic" recognition model (covering Russian and similar Cyrillic-script languages) but no "tajik"/"tgk" model | Same fallback-and-correct pattern as Tesseract applies — expect the same six-letter substitution failure mode, since "cyrillic" here means the same kind of Russian-centric training gap. |
 | PaddleOCR classical / PP-OCRv5 (official cloud API) | Unconfirmed for Tajik specifically | Requires a paid access token and sends images to a cloud API — a real cost and privacy tradeoff for something whose Tajik coverage isn't independently verified either. |
 
 **Why this category is the fallback, not the default:** even where installable and free (Tesseract, RapidOCR), the underlying issue — no trained Tajik model — doesn't go away. It's a legitimate choice for offline/bulk work where the vision-LLM approach isn't practical, but go in expecting to need the correction pass, not expecting clean output.

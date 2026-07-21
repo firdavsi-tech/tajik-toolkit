@@ -1,7 +1,7 @@
 ---
 name: tajik-toolkit
 description: Complete toolkit for Tajik-language (тоҷикӣ) text — editing and proofreading, OCR extraction from images/scans/PDFs, and full book restoration to a formatted DOCX matching the source. Covers mixed Tajik/Russian/English/Arabic/Persian text and Latin-transliterated Pahlavi. Use when writing, editing, correcting, reviewing, extracting, or restoring Tajik text or documents, or translating into/out of Tajik.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Tajik Toolkit
@@ -74,9 +74,19 @@ See [delivery.md](delivery.md) for the full checklist and verification steps (gr
 |---|---|
 | [orthography.md](orthography.md) | Checking letter confusions, izafat/hyphenation, or transliteration of names |
 | [register.md](register.md) | A register/loanword judgment call comes up |
+| [glossary.md](glossary.md) | Recurring Arabic honorific formulas (салла-л-Лоҳу алайҳи ва саллам, etc.) in historical/religious texts |
 | [mixed-script.md](mixed-script.md) | Text mixes Tajik with Russian/English/Arabic/Persian, or quotes Pahlavi in Latin transliteration |
 | [ocr-engines.md](ocr-engines.md) | Choosing a specific OCR engine/API |
 | [ocr-pipeline.md](ocr-pipeline.md) | Running the classical-OCR fallback scripts, batch/PDF processing, or the output contract |
-| [restoration.md](restoration.md) | Restoring a whole scanned book/document — method, supported source formats (PDF/DJVU/PNG/TIFF/JPEG) |
-| [formatting.md](formatting.md) | Generating the DOCX for a restoration — concrete docx-js patterns |
-| [delivery.md](delivery.md) | Before writing any output file — clean-body-text and real-footnote checklist |
+| [restoration.md](restoration.md) | Restoring a whole scanned book/document — method, supported source formats (PDF/DJVU — now verified via a real round-trip test/PNG/TIFF/JPEG) |
+| [formatting.md](formatting.md) | Generating the DOCX for a restoration — concrete docx-js patterns, including tables |
+| [delivery.md](delivery.md) | Before writing any output file — clean-body-text and real-footnote checklist; run `scripts/verify_docx.py` to automate it |
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/find_scanned_files.py` | Read-only, cross-drive discovery of scanned-document files |
+| `scripts/ocr_batch.py` | Local Tesseract batch OCR with PDF rendering and letter-substitution flagging |
+| `scripts/djvu_to_pdf.py` | Converts DJVU to PDF (via DjVuLibre's `ddjvu`) so it enters the same pipeline as any PDF source |
+| `scripts/verify_docx.py` | Automates the delivery/formatting checklist against a generated DOCX — forbidden strings, real footnotes, fonts, headings, RTL markers |

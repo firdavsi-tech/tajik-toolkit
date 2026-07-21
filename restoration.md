@@ -15,11 +15,13 @@ See [SKILL.md](SKILL.md) for when this mode applies. This is a *restoration* tas
 
 PDF, PNG, TIFF, JPEG — PDF pages rendered to images via PyMuPDF (verified working), PNG/TIFF/JPEG read directly (as vision input, or as classical-OCR input per [ocr-pipeline.md](ocr-pipeline.md)).
 
-**DJVU is not yet verified on this machine** — no DjVuLibre (`ddjvu`) binary and no Python DJVU binding are installed here. DJVU is a genuinely different format from PDF — it isn't a variant PyMuPDF or the existing pipeline can already open. Before treating a `.djvu` source the same way as a PDF:
+**DJVU — now verified with a real round-trip test (2026-07-22), not just a theoretical claim.** DjVuLibre installed via `winget install DjVuLibre.DjView` (provides `ddjvu.exe`, typically at `C:\Program Files (x86)\DjVuLibre\ddjvu.exe` — not added to PATH automatically on Windows). Tested: a real Tajik page image → `c44` → `.djvu` → `scripts/djvu_to_pdf.py` (wraps `ddjvu -format=pdf`) → `.pdf` → opened and rendered correctly with PyMuPDF, text fully readable.
 
-1. Confirm a DJVU-to-image conversion path is actually available (typically `ddjvu -format=png` per page, from DjVuLibre — this needs installing, it isn't present by default). Ask before installing anything new.
-2. Once page images exist, everything downstream (vision reading, classical OCR fallback, correction, formatting) is identical to the PNG/TIFF/JPEG path — DJVU only affects the first conversion step, nothing else.
-3. Don't claim DJVU support is "the same as PDF" in practice until step 1 has actually been done and tested on a real DJVU file — the format's absence of any installed tooling here is a real gap, not a formality.
+```bash
+python scripts/djvu_to_pdf.py source.djvu converted.pdf
+```
+
+After conversion, the resulting PDF enters the exact same pipeline as any other PDF source — DJVU only affects this one conversion step, nothing downstream (vision reading, classical OCR fallback, correction, formatting are all identical from here).
 
 ## Mixed-script scope
 

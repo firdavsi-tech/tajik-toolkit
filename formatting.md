@@ -78,12 +78,51 @@ Before applying this, confirm per [mixed-script.md](mixed-script.md) whether the
 
 Same body-text formatting (Palatino Linotype 12pt Justified) as the main text — the contract doesn't call out different formatting for this section, only that its *content* must match the source's actual entries exactly, in the source's order. Don't reformat citation style or "clean up" entries the source presents inconsistently — reproduce them as-is.
 
+## Tables (gap found in real use, not in the original contract)
+
+The original 8-point formatting contract (SKILL.md/restoration.md) covers body, headings, footnotes, and RTL blocks — it does not specify tables, even though real restoration work has needed them (Gardizi's *Zayn al-Akhbar* includes several dense genealogical tables spanning multiple pages). Until the user specifies otherwise, apply this default: table cells use a smaller size than body text (10pt / size 20, matching footnote size, since dense tables read better compact) at the same Palatino Linotype font, and header cells (row/column labels) are bold with light shading for visual separation:
+
+```js
+const { Table, TableRow, TableCell, WidthType } = require("docx");
+
+function cell(text, opts = {}) {
+  return new TableCell({
+    width: { size: opts.width || 1100, type: WidthType.DXA },
+    shading: opts.header ? { type: "clear", fill: "D9D9D9" } : undefined,
+    children: [new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: text || "", font: "Palatino Linotype", size: 20, bold: !!opts.header })],
+    })],
+  });
+}
+
+new Table({
+  width: { size: 9000, type: WidthType.DXA },
+  columnWidths: [1400, 1100, 1100],   // must sum to the table's width, and match cell widths exactly — a docx-js gotcha, not optional
+  rows: [
+    new TableRow({ children: [cell("", { header: true, width: 1400 }), cell("Col A", { header: true }), cell("Col B", { header: true })] }),
+    new TableRow({ children: [cell("Row label", { header: true, width: 1400 }), cell("data"), cell("data")] }),
+  ],
+});
+```
+
+**A genuine flag, not a made-up rule:** this default (10pt cells, centered, shaded header) is a reasonable choice made once real tables showed up, not something the user specified in the original 8-point contract. If a restoration involves tables, confirm this default is acceptable before committing to it at scale, the same way any other formatting assumption should be checked when the contract doesn't cover a case explicitly.
+
+**Dense tabular proper-noun data carries more transcription risk than flowing prose** — a single misaligned cell in a genealogical table misattributes real historical data, which is a more consequential error than a typo in a sentence. Flag dense tables for extra source cross-referencing specifically (per [restoration.md](restoration.md)'s method), not just the standard one-pass check.
+
 ## Verification checklist before declaring a restoration done
 
-Beyond [delivery.md](delivery.md)'s existing checks (no editorial commentary in the body, real footnotes present):
+Beyond [delivery.md](delivery.md)'s existing checks (no editorial commentary in the body, real footnotes present) — and use `scripts/verify_docx.py` to automate the mechanical parts of this rather than re-typing the same unzip+grep commands by hand:
 
 - [ ] Every heading paragraph has both a `HeadingLevel` and the explicit Palatino/16/Bold run override
 - [ ] The TOC (if present) was generated from those headings, not typed manually
 - [ ] Every Arabic/Persian block paragraph has `bidirectional: true` AND its runs have `rightToLeft: true`
 - [ ] Body text runs specify `font: "Palatino Linotype", size: 24`; footnote runs specify `size: 20`
+- [ ] Table cells specify `font: "Palatino Linotype"` at whatever size was agreed (default 20, per the tables section above)
 - [ ] Bibliography entries match the source's list one-to-one — count them against the source page if unsure
+
+```bash
+python scripts/verify_docx.py output.docx --expect-headings --expect-footnotes --expect-rtl
+```
+
+(Only pass the `--expect-*` flags that actually apply to the document being checked — a restoration with no Arabic/Persian content shouldn't be checked with `--expect-rtl`.)
