@@ -1,7 +1,7 @@
 ---
 name: tajik-toolkit
 description: Complete toolkit for Tajik-language (тоҷикӣ) text — editing and proofreading, OCR extraction from images/scans/PDFs, and full book restoration to a formatted DOCX matching the source. Covers mixed Tajik/Russian/English/Arabic/Persian text and Latin-transliterated Pahlavi. Use when writing, editing, correcting, reviewing, extracting, or restoring Tajik text or documents, or translating into/out of Tajik.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Tajik Toolkit
@@ -78,9 +78,10 @@ See [delivery.md](delivery.md) for the full checklist and verification steps (gr
 | [mixed-script.md](mixed-script.md) | Text mixes Tajik with Russian/English/Arabic/Persian, or quotes Pahlavi in Latin transliteration |
 | [ocr-engines.md](ocr-engines.md) | Choosing a specific OCR engine/API |
 | [ocr-pipeline.md](ocr-pipeline.md) | Running the classical-OCR fallback scripts, batch/PDF processing, or the output contract |
-| [restoration.md](restoration.md) | Restoring a whole scanned book/document — method, supported source formats (PDF/DJVU — now verified via a real round-trip test/PNG/TIFF/JPEG) |
-| [formatting.md](formatting.md) | Generating the DOCX for a restoration — concrete docx-js patterns, including tables |
+| [restoration.md](restoration.md) | Restoring a whole scanned book/document — method (page-offset calibration, TOC-first heading hierarchy, number/date cross-checks), supported source formats (PDF/DJVU — verified via a real round-trip test/PNG/TIFF/JPEG, DPI guidance), non-text elements, multi-volume series, author-vs-editor footnotes, large-book batching |
+| [formatting.md](formatting.md) | Generating the DOCX for a restoration — concrete docx-js patterns, including tables and verse/poetry line breaks |
 | [delivery.md](delivery.md) | Before writing any output file — clean-body-text and real-footnote checklist; run `scripts/verify_docx.py` to automate it |
+| [case-log.md](case-log.md) | Recording (and checking) real cases found during restorations — register calls, footnote-attribution catches, formatting bugs |
 
 ## Scripts
 
@@ -89,4 +90,5 @@ See [delivery.md](delivery.md) for the full checklist and verification steps (gr
 | `scripts/find_scanned_files.py` | Read-only, cross-drive discovery of scanned-document files |
 | `scripts/ocr_batch.py` | Local Tesseract batch OCR with PDF rendering and letter-substitution flagging |
 | `scripts/djvu_to_pdf.py` | Converts DJVU to PDF (via DjVuLibre's `ddjvu`) so it enters the same pipeline as any PDF source |
-| `scripts/verify_docx.py` | Automates the delivery/formatting checklist against a generated DOCX — forbidden strings, real footnotes, fonts, headings, RTL markers |
+| `scripts/verify_docx.py` | Automates the delivery/formatting checklist against a generated DOCX — forbidden strings, real footnotes, fonts, headings, RTL markers, literal-`\n`-in-TextRun bug |
+| `scripts/check_consistency.py` | Scans a generated DOCX for the same proper name spelled two different ways across the document (letter-confusion and near-duplicate detection) |

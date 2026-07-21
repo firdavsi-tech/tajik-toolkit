@@ -11,6 +11,10 @@ Checks:
   4. At least one real Heading style is present, if headings were expected
   5. If Arabic/Persian RTL content is present, both rightToLeft and
      bidirectional markers exist in the XML (formatting.md RTL section)
+  6. No literal "\n" inside a <w:t> text run — a real bug found in practice:
+     it does not render as a line break in Word (no <w:br/> is produced),
+     so verse/poetry built this way silently loses its intended line breaks
+     (formatting.md "Verse/poetry and multi-line text" section)
 
 This is a checklist automation, not a replacement for actually looking at
 the content — a clean report here means the mechanical checks passed, not
@@ -38,6 +42,10 @@ def extract_text_runs(xml_content):
 
 
 def main():
+    # Windows console codepages (cp1252/cp1256/etc.) can't encode Cyrillic —
+    # force UTF-8 stdout so report lines don't get silently mangled.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("docx_path")
     parser.add_argument("--expect-headings", action="store_true",
@@ -65,6 +73,15 @@ def main():
     # formatting.md: Palatino Linotype actually used
     if "Palatino Linotype" not in doc_xml:
         problems.append("No 'Palatino Linotype' font reference found in document.xml — formatting contract not applied")
+
+    # formatting.md: literal \n inside a text run never renders as a line break
+    newline_runs = [t for t in texts if "\n" in t]
+    if newline_runs:
+        problems.append(
+            f"{len(newline_runs)} text run(s) contain a literal newline character inside <w:t> — "
+            "this does NOT render as a line break in Word (no <w:br/> present); use `break: 1` on "
+            "the following TextRun instead, see formatting.md's Verse/poetry section"
+        )
 
     # Headings
     heading_count = len(re.findall(r'w:val="Heading', doc_xml))

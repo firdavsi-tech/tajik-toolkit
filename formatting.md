@@ -74,6 +74,24 @@ new Paragraph({
 
 Before applying this, confirm per [mixed-script.md](mixed-script.md) whether the passage is actually Arabic or actually Persian — both use this same RTL formatting, but don't apply Tajik-orthography correction logic to either (that's a different script/language entirely).
 
+## Verse/poetry and multi-line text: never use `\n` inside a TextRun
+
+**A confirmed real bug, not a theoretical concern:** a literal `\n` character inside a `TextRun`'s `text` string (e.g. `new TextRun({ text: "Line one,\nLine two." })`, used for Hofiz couplets in a real restoration) gets written into `<w:t xml:space="preserve">` as-is, with **no `<w:br/>` element** — confirmed by generating a minimal test file and inspecting the raw XML. Word does not reliably render a bare `\n` inside text content as a visible line break; it requires an actual `<w:br/>` element.
+
+**The correct pattern** — confirmed against `docx`'s actual `dist/index.d.ts` (`IRunOptionsBase.break?: number`) and by inspecting the generated XML, which does produce a real `<w:br/>`:
+
+```js
+new Paragraph({
+  alignment: AlignmentType.JUSTIFIED,
+  children: [
+    new TextRun({ text: "Субҳ хезиву саломат талабӣ чун Ҳофиз,", font: "Palatino Linotype", size: 24 }),
+    new TextRun({ text: "Ҳар чӣ кардам, ҳама аз давлати \"Қуръон\" кардам.", font: "Palatino Linotype", size: 24, break: 1 }),
+  ],
+});
+```
+
+`break: 1` on a run inserts a `<w:br/>` before that run's own text — chain more runs the same way for a multi-line verse block. Never split verse lines with a literal `\n` character, and never rely on `xml:space="preserve"` to make whitespace do a line break's job — see [case-log.md](case-log.md) for the real case this was caught from, including which already-delivered document needs its poetry paragraphs rebuilt.
+
 ## Bibliography / source list
 
 Same body-text formatting (Palatino Linotype 12pt Justified) as the main text — the contract doesn't call out different formatting for this section, only that its *content* must match the source's actual entries exactly, in the source's order. Don't reformat citation style or "clean up" entries the source presents inconsistently — reproduce them as-is.
@@ -120,6 +138,7 @@ Beyond [delivery.md](delivery.md)'s existing checks (no editorial commentary in 
 - [ ] Body text runs specify `font: "Palatino Linotype", size: 24`; footnote runs specify `size: 20`
 - [ ] Table cells specify `font: "Palatino Linotype"` at whatever size was agreed (default 20, per the tables section above)
 - [ ] Bibliography entries match the source's list one-to-one — count them against the source page if unsure
+- [ ] No verse/multi-line text uses a literal `\n` inside a `TextRun`'s `text` — every internal line break uses `break: 1` on the following run (see the Verse/poetry section above; `scripts/verify_docx.py` now checks for this automatically)
 
 ```bash
 python scripts/verify_docx.py output.docx --expect-headings --expect-footnotes --expect-rtl
