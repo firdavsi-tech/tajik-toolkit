@@ -42,6 +42,8 @@ Built and validated against real material, not just synthetic tests: a 49-page 1
 | `scripts/djvu_to_pdf.py` | Converts DJVU to PDF via DjVuLibre's `ddjvu`, tested with a real round-trip |
 | `scripts/verify_docx.py` | Automates the delivery/formatting checklist against a generated DOCX, including a check for the literal-`\n`-in-TextRun line-break bug |
 | `scripts/check_consistency.py` | Scans a generated DOCX for the same proper name spelled two different ways across the document |
+| `scripts/tests/run_tests.py` | Regression suite for the two scripts above, against synthetic fixtures (no Node/docx-js needed) |
+| `CHANGELOG.md` | What changed between versions |
 
 ## License
 

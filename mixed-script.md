@@ -23,6 +23,12 @@ This is a fundamentally different problem from тадж/рус/англ mixing a
 - **For accurate transcription of the Arabic-script portion, use direct vision-based reading of that region** (per SKILL.md's OCR mode) rather than trusting any classical-OCR output there — this is the one case where the automated local pipeline isn't a degraded-but-usable fallback, it's simply not applicable.
 - **When reporting extracted text from such a document, separate the two clearly** — don't present Arabic-script noise as if it were an uncertain Tajik reading; label it as a different script requiring separate handling.
 
+## Eastern Arabic-Indic numerals in Arabic/Persian citations
+
+Arabic and Persian sources sometimes render numbers with Eastern Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩ — used for verse/ayat numbers, dates, page references within the quoted script) rather than the Western digits (0-9) used in the surrounding Tajik text. Persian additionally has its own variant forms for four of them (۴ ۵ ۶ instead of ٤ ٥ ٦) — don't treat the Arabic and Persian digit variants as interchangeable, same as not conflating the two languages above.
+
+**Reproduce the source's own numeral system inside an RTL/Arabic-Persian span — don't silently convert to Western digits.** A verse-number marker in an ayat citation written as ٥ in the source should stay ٥ in the restoration, not become "5"; converting it is a small but real transcription change, not a formatting no-op. This applies specifically inside the RTL span itself — the surrounding Tajik text keeps its own normal Western-digit conventions.
+
 ## Arabic vs. Persian — don't conflate them just because the script looks similar
 
 Persian (Farsi) uses a Perso-Arabic script with extra letters Arabic doesn't have (پ چ ژ گ) and different vocabulary and pronunciation despite sharing most of the alphabet. A Tajik text quoting the Qur'an is quoting Arabic; a Tajik text quoting Hofiz, Rumi, or another Persian classical author is quoting Persian — check which is actually intended from context (the cited author/source) rather than assuming "Arabic-looking script = Arabic." Both need the same "don't correct with Tajik rules, read directly" handling above, but mislabeling one as the other is its own kind of error worth avoiding, especially in a bibliography or citation entry where the source language matters. For restoration work, both render with the same RTL formatting (see [formatting.md](formatting.md)) — but identify the language correctly before treating it as either.

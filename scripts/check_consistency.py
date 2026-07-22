@@ -22,6 +22,7 @@ restoration.md's method before "fixing" anything.
 import argparse
 import re
 import sys
+import unicodedata
 import zipfile
 from collections import defaultdict
 
@@ -52,7 +53,10 @@ def extract_body_text(docx_path):
     if doc_xml is None:
         return None
     runs = re.findall(r"<w:t[^>]*>(.*?)</w:t>", doc_xml, re.DOTALL)
-    return " ".join(runs)
+    # NFC-normalize: Ӣ/Ӯ can arrive as a precomposed codepoint or as base+combining
+    # diacritic (see orthography.md) — without this, CONFUSION_MAP's exact-character
+    # keys silently fail to match the decomposed form and detection just misses it.
+    return unicodedata.normalize("NFC", " ".join(runs))
 
 
 def capitalized_words(text):

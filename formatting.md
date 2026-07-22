@@ -74,6 +74,26 @@ new Paragraph({
 
 Before applying this, confirm per [mixed-script.md](mixed-script.md) whether the passage is actually Arabic or actually Persian — both use this same RTL formatting, but don't apply Tajik-orthography correction logic to either (that's a different script/language entirely).
 
+### Quranic ayat citations specifically
+
+A Qur'anic verse quoted inline (distinct from a general Arabic/Persian block above) conventionally gets set off with the ornamental bracket pair ﴾ ﴿ (U+FD3E/U+FD3F, not a regular parenthesis) around the Arabic text, and is often centered rather than right-aligned when it's a standalone cited verse rather than part of a running RTL paragraph:
+
+```js
+new Paragraph({
+  bidirectional: true,
+  alignment: AlignmentType.CENTER,
+  children: [new TextRun({
+    text: "﴾ إِنَّ هَـٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ ﴿",
+    font: "Palatino Linotype",
+    size: 32,
+    bold: true,
+    rightToLeft: true,
+  })],
+});
+```
+
+Only apply the bracket pair to an actual Qur'anic citation, not to general Arabic/Persian quotations — using it on a Hofiz couplet, for instance, would misrepresent a Persian poet's line as scripture. Reproduce the source's own convention if it already brackets citations differently (a different bracket glyph, or none at all) rather than imposing this as a default.
+
 ## Verse/poetry and multi-line text: never use `\n` inside a TextRun
 
 **A confirmed real bug, not a theoretical concern:** a literal `\n` character inside a `TextRun`'s `text` string (e.g. `new TextRun({ text: "Line one,\nLine two." })`, used for Hofiz couplets in a real restoration) gets written into `<w:t xml:space="preserve">` as-is, with **no `<w:br/>` element** — confirmed by generating a minimal test file and inspecting the raw XML. Word does not reliably render a bare `\n` inside text content as a visible line break; it requires an actual `<w:br/>` element.
@@ -127,6 +147,47 @@ new Table({
 **A genuine flag, not a made-up rule:** this default (10pt cells, centered, shaded header) is a reasonable choice made once real tables showed up, not something the user specified in the original 8-point contract. If a restoration involves tables, confirm this default is acceptable before committing to it at scale, the same way any other formatting assumption should be checked when the contract doesn't cover a case explicitly.
 
 **Dense tabular proper-noun data carries more transcription risk than flowing prose** — a single misaligned cell in a genealogical table misattributes real historical data, which is a more consequential error than a typo in a sentence. Flag dense tables for extra source cross-referencing specifically (per [restoration.md](restoration.md)'s method), not just the standard one-pass check.
+
+## Running headers/footers and page numbers matching the source
+
+**Not in the original 8-point contract — a genuine flag, like the tables section above, not a default to apply silently.** A full-book restoration's source often has running headers (book/chapter title) and printed page numbers; the contract doesn't say whether the restored DOCX should reproduce them. Confirm with the user before adding headers/footers — a small excerpt restoration ("pages 100-110") may not want a running header referencing a book title never introduced in the excerpt, while a full-book restoration might.
+
+If confirmed wanted, the docx-js pattern:
+
+```js
+const { Header, Footer, PageNumber } = require("docx");
+
+const doc = new Document({
+  sections: [{
+    headers: {
+      default: new Header({
+        children: [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: "Тартил-ул-Қуръон", font: "Palatino Linotype", size: 20 })],
+        })],
+      }),
+    },
+    footers: {
+      default: new Footer({
+        children: [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ children: [PageNumber.CURRENT], font: "Palatino Linotype", size: 20 })],
+        })],
+      }),
+    },
+    children,
+  }],
+});
+```
+
+Word's own page-numbering starts at 1 for the section regardless of the source's printed page numbers. If the file needs to *display* the source's actual printed number rather than Word's own running count, set it explicitly via `properties.page.pageNumbers.start` (confirmed against `docx`'s actual `dist/index.d.ts` — `ISectionPropertiesOptionsBase.page.pageNumbers: IPageNumberTypeAttributes`) using the offset already calibrated in restoration.md's Step 0:
+
+```js
+sections: [{
+  properties: { page: { pageNumbers: { start: 100 } } },  // matches the source's own printed page number
+  headers: { ... }, footers: { ... }, children,
+}],
+```
 
 ## Verification checklist before declaring a restoration done
 

@@ -1,12 +1,12 @@
 ---
 name: tajik-toolkit
 description: Complete toolkit for Tajik-language (тоҷикӣ) text — editing and proofreading, OCR extraction from images/scans/PDFs, and full book restoration to a formatted DOCX matching the source. Covers mixed Tajik/Russian/English/Arabic/Persian text and Latin-transliterated Pahlavi. Use when writing, editing, correcting, reviewing, extracting, or restoring Tajik text or documents, or translating into/out of Tajik.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Tajik Toolkit
 
-One skill covering three layers of the same problem: **editing** Tajik text you already have, **extracting** Tajik text from an image/scan/PDF, and **restoring** a whole scanned document into a formatted DOCX matching the source. Consolidated from three separate skills (`tajik-text`, `tajik-ocr`, `tajik-book-restore`) built and tested over several real tasks, including a real 49-page tajwid manual and a real 416-page 11th-century historical chronicle (Gardizi's *Zayn al-Akhbar*).
+One skill covering three layers of the same problem: **editing** Tajik text you already have, **extracting** Tajik text from an image/scan/PDF, and **restoring** a whole scanned document into a formatted DOCX matching the source. Consolidated from three separate skills (`tajik-text`, `tajik-ocr`, `tajik-book-restore`) built and tested over several real tasks, including a real 49-page tajwid manual and a real 416-page 11th-century historical chronicle (Gardizi's *Zayn al-Akhbar*). See [CHANGELOG.md](CHANGELOG.md) for what changed between versions.
 
 ## Calibrate confidence before touching anything (do this first, always)
 
@@ -92,3 +92,4 @@ See [delivery.md](delivery.md) for the full checklist and verification steps (gr
 | `scripts/djvu_to_pdf.py` | Converts DJVU to PDF (via DjVuLibre's `ddjvu`) so it enters the same pipeline as any PDF source |
 | `scripts/verify_docx.py` | Automates the delivery/formatting checklist against a generated DOCX — forbidden strings, real footnotes, fonts, headings, RTL markers, literal-`\n`-in-TextRun bug |
 | `scripts/check_consistency.py` | Scans a generated DOCX for the same proper name spelled two different ways across the document (letter-confusion and near-duplicate detection) |
+| `scripts/tests/run_tests.py` | Regression test suite for the two scripts above, against synthetic fixtures (no Node/docx-js needed) — run after editing either script |

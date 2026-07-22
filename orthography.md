@@ -25,6 +25,12 @@ Tajik uses the izafat (-и / -йи) to link a noun to a following modifier or po
 
 Tajik compounding conventions (when to write as one word, hyphenated, or as separate words) don't map directly from Russian compounding rules — don't apply Russian hyphenation instincts by default. When a document already hyphenates a term a particular way, follow that as an established convention (style-sheet principle from SKILL.md) rather than "correcting" it to a Russian-influenced pattern.
 
+## Unicode normalization: Ӣ/Ӯ can be encoded two different ways
+
+Ӣӣ and Ӯӯ each have two valid Unicode encodings that render identically but are different byte sequences: a single precomposed codepoint (NFC — U+04E2/U+04E3 for Ӯӯ, U+04EE/U+04EF... check the specific pair in use), or a base letter plus a combining diacritic as separate codepoints (NFD). Text assembled from different sources (typed fresh vs. copy-pasted from a PDF vs. output from an OCR engine) can mix both forms invisibly — visually identical, but `==` string comparison or exact-match tooling (like [check_consistency.py](scripts/check_consistency.py)'s name-grouping, or a TOC hyperlink matching a heading's exact text) will treat them as different strings.
+
+**When building or checking a document programmatically, normalize to NFC first** (Python: `unicodedata.normalize("NFC", text)`) before any exact-match comparison — don't assume the source text arrived in one consistent form. This is a real risk for any script in this toolkit that does string matching on Tajik text, not just a theoretical concern.
+
 ## Transliteration of foreign and Russian-origin names
 
 Names of people, places, and Russian-origin technical/institutional terms get rendered into Tajik Cyrillic with conventions that don't always match a straightforward Russian-to-Tajik letter swap — some established Soviet-era transliterations persist by convention even where a more literal rendering would differ. When a document already transliterates a recurring name a particular way, log it to the style sheet and stay consistent with it rather than re-deriving the "correct" transliteration each time it appears.
